@@ -19,11 +19,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import com.pramati.usercommitcrawler.beans.UserCommitHistory;
 import com.pramati.usercommitcrawler.beans.UserInformation;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
-import com.pramati.usercommitcrawler.filemanager.FileManager;
 
 public class RepositoryCrawler {
 
-	private FileManager fileManager = new FileManager();
 	private UserProjects userProjects = new UserProjects();
 	private UserCommitCrawlerThreadManager threadManager = new UserCommitCrawlerThreadManager();
 
