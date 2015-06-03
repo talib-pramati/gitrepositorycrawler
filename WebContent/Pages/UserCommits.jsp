@@ -17,6 +17,7 @@
 	</form>
 	</div>
 	<div>
+	<c:if test="${not empty requestScope.userCommitHistoryList}">
 	<table border = 1>
 		<tr>
 			<th width="5%">UserName</th>
@@ -37,6 +38,7 @@
 
 		</c:forEach>
 	</table>
+	</c:if>
 	</div>
 </body>
 </html>

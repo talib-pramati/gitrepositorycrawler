@@ -68,7 +68,7 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 				StringBuilder commitTextStringBulider = new StringBuilder();
 				for (Element committedText : committedTexts) {
 					String text = committedText.text();
-					text = text.replace("+", "\n");
+					text = text.replace("+", "\n").replace("<", "");
 					commitTextStringBulider.append(text);
 				}
 
@@ -139,8 +139,10 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 			Elements commitTexts = document
 					.select("td.blob-code-addition span.blob-code-inner");
 			StringBuilder commitTextStringBuilder = new StringBuilder();
-			for (Element commitText : commitTexts) {
-				commitTextStringBuilder.append(commitText.text());
+			for (Element committedText : commitTexts) {
+				String text = committedText.text();
+				text = text.replace("+", "\n").replace("<", "");
+				commitTextStringBuilder.append(text);
 			}
 
 			switch (fieldValue) {
