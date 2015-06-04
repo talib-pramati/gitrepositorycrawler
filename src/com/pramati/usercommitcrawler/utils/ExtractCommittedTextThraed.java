@@ -137,7 +137,7 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 		try {
 			Document document = Jsoup.connect(url).get();
 			Elements commitTexts = document
-					.select("td.blob-code-addition span.blob-code-inner");
+					.select(UserCommitCrawlerConstants.TEXT_SELECTOR_REGEX);
 			StringBuilder commitTextStringBuilder = new StringBuilder();
 			for (Element committedText : commitTexts) {
 				String text = committedText.text();
