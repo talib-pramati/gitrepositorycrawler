@@ -1,5 +1,5 @@
 package com.pramati.usercommitcrawler.utils;
 
 public enum CommitHistoryFields {
-	YESTERDAY, TODAY,LAST_COMMIT
+	YESTERDAY, TODAY,DAYS_BEFORE_YESTERDAY
 }

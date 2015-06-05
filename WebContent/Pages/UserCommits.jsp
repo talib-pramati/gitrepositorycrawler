@@ -10,35 +10,48 @@
 <body>
 
 	<div>
-	<form action="UserCommitCrawlerServlet" method="post" enctype="multipart/form-data">
-		<input type="file" name = "inputFile">
-		<input type = "submit" value = "upload">
-		<div id = "message">${requestScope.message}</div>
-	</form>
+		<form action="UserCommitCrawlerServlet" method="post"
+			enctype="multipart/form-data">
+			<input type="file" name="inputFile"> <input type="submit"
+				value="upload">
+			<div id="message">${requestScope.message}</div>
+		</form>
 	</div>
 	<div>
-	<c:if test="${not empty requestScope.userCommitHistoryList}">
-	<table border = 1>
-		<tr>
-			<th width="5%">UserName</th>
-			<th width="10%">RepositoryURL</th>
-			<th width="28%">Yesterdays Commit</th>
-			<th width="28%">Todays Commit</th>
-			<th width="28%">Last Commit</th>
-		</tr>
-		<c:forEach items="${requestScope.userCommitHistoryList}"
-			var="userCommitHistory">
-			<tr>
-				<td width="5%">${userCommitHistory.userName}</td>
-				<td width="10%">${userCommitHistory.repoURL}</td>
-				<td width="28%">${userCommitHistory.yesterDaysCommit}</td>
-				<td width="28%">${userCommitHistory.todaysCommit}</td>
-				<td width="28%">${userCommitHistory.lastCommit}</td>
-			</tr>
 
-		</c:forEach>
-	</table>
-	</c:if>
+		<table border=1>
+			<tbody>
+				<c:forEach items="${requestScope.userCommitHistoryList}"
+					var="userCommitHistory">
+					<tr>
+						<td>${userCommitHistory.userName}</td>
+						<td>
+							<table border=1>
+								<thead>
+									<tr>
+										<th width="28%">repository name</th>
+										<th width="28%">days before yesterdays commit</th>
+										<th width="28%">yesterdays commit</th>
+										<th width="28%">todays commit</th>
+									</tr>
+								</thead>
+								<tbody>
+									<c:forEach items="${userCommitHistory.repositoryCommitHistory}"
+										var="repoCommitHistory">
+										<tr>
+											<td width="28%">${repoCommitHistory.repoSitoryName}</td>
+											<td width="28%">${repoCommitHistory.dayBeforeYesrdaysCommit}</td>
+											<td width="28%">${repoCommitHistory.yesterdaysCommit}</td>
+											<td width="28%">${repoCommitHistory.todaysCommit}</td>
+										</tr>
+									</c:forEach>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
 	</div>
 </body>
 </html>

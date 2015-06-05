@@ -14,6 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.pramati.usercommitcrawler.beans.RepositoryCommitHistory;
 import com.pramati.usercommitcrawler.beans.UserCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
 import com.sun.istack.internal.logging.Logger;
@@ -41,12 +42,13 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 		UserCommitHistory userCommitHistory = new UserCommitHistory();
 		try {
 
-			DateTime lastCommitDateTime = DateTime.now().minusYears(100);
 			HashMap<String, List<String>> pagesContainingCommittedText = getAllPagesContainingCommitTexts(projectsCommitHistoryPage);
 			userCommitHistory = extractCommittedText(projectsCommitHistoryPage,
-					pagesContainingCommittedText, lastCommitDateTime);
-			appendLatestCommitText(userCommitHistory, lastCommitPage);
-			userCommitHistory.setUserName(userName);
+					pagesContainingCommittedText);
+			/*
+			 * appendLatestCommitText(userCommitHistory, lastCommitPage);
+			 * userCommitHistory.setUserName(userName);
+			 */
 
 		} catch (IOException exception) {
 
@@ -72,9 +74,6 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 					commitTextStringBulider.append(text);
 				}
 
-				
-				userCommitHistory.setLastCommit(commitTextStringBulider);
-
 			} catch (SocketTimeoutException socketTimeoutException) {
 				if (LOGGER.isLoggable(Level.WARNING)) {
 					LOGGER.log(Level.WARNING,
@@ -87,16 +86,19 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 
 	public UserCommitHistory extractCommittedText(
 			List<String> projectsCommitHistoryPage,
-			HashMap<String, List<String>> pagesContainingCommittedTextMap,
-			DateTime lastCommitDateTime) throws IOException {
+			HashMap<String, List<String>> pagesContainingCommittedTextMap)
+			throws IOException {
 
 		UserCommitHistory userCommitHistory = new UserCommitHistory();
 
 		for (String commitHistoryPage : projectsCommitHistoryPage) {
+			RepositoryCommitHistory repositoryCommitHistory = new RepositoryCommitHistory();
+			repositoryCommitHistory.setRepoSitoryName(commitHistoryPage);
 			List<String> pagesContainingCommittedText = pagesContainingCommittedTextMap
 					.get(commitHistoryPage);
 			for (String pageContainingCommittedText : pagesContainingCommittedText) {
-				Document documnent = Jsoup.connect(pageContainingCommittedText).get();
+				Document documnent = Jsoup.connect(pageContainingCommittedText)
+						.get();
 				String date = documnent.select("time").attr("datetime");
 
 				DateTime committedPagesdDateTime = new DateTime(date);
@@ -108,30 +110,39 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 								.getMonthOfYear()
 						&& committedPagesdDateTime.getDayOfMonth() == today
 								.getDayOfMonth()) {
-					appendCommitText(userCommitHistory,
-							CommitHistoryFields.TODAY, pageContainingCommittedText);
+					appendCommitText(repositoryCommitHistory,
+							CommitHistoryFields.TODAY,
+							pageContainingCommittedText);
 				}
 
-				else if (committedPagesdDateTime.getYear() == yesterday.getYear()
+				else if (committedPagesdDateTime.getYear() == yesterday
+						.getYear()
 						&& committedPagesdDateTime.getMonthOfYear() == yesterday
 								.getMonthOfYear()
 						&& committedPagesdDateTime.getDayOfMonth() == yesterday
 								.getDayOfMonth()) {
-					appendCommitText(userCommitHistory,
-							CommitHistoryFields.YESTERDAY, pageContainingCommittedText);
+					appendCommitText(repositoryCommitHistory,
+							CommitHistoryFields.YESTERDAY,
+							pageContainingCommittedText);
 				}
 
-				if (committedPagesdDateTime.isAfter(lastCommitDateTime)) {
-					lastCommitDateTime = committedPagesdDateTime;
-					lastCommitPage = pageContainingCommittedText;
+				else {
+
+					appendCommitText(repositoryCommitHistory,
+							CommitHistoryFields.DAYS_BEFORE_YESTERDAY,
+							pageContainingCommittedText);
 				}
 			}
+			userCommitHistory.getRepositoryCommitHistory().add(
+					repositoryCommitHistory);
 		}
 
+		userCommitHistory.setUserName(userName);
 		return userCommitHistory;
 	}
 
-	public void appendCommitText(UserCommitHistory userCommitHistory,
+	public void appendCommitText(
+			RepositoryCommitHistory repositoryCommitHistory,
 			CommitHistoryFields fieldValue, String url) throws IOException {
 
 		try {
@@ -141,16 +152,25 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 			StringBuilder commitTextStringBuilder = new StringBuilder();
 			for (Element committedText : commitTexts) {
 				String text = committedText.text();
-				text = text.replace("+", "\n").replace("<", "");
+				text = text.replace("+", "").replace("<", "<'")
+						.replace(";", "<BR>");
 				commitTextStringBuilder.append(text);
 			}
 
 			switch (fieldValue) {
 			case YESTERDAY:
-				userCommitHistory.setYesterDaysCommit(commitTextStringBuilder);
+				// repositoryCommitHistory.setYesterDaysCommit(commitTextStringBuilder);
+				repositoryCommitHistory.getYesterdaysCommit().append(
+						commitTextStringBuilder);
 				break;
 			case TODAY:
-				userCommitHistory.setTodaysCommit(commitTextStringBuilder);
+				// userCommitHistory.setTodaysCommit(commitTextStringBuilder);
+				repositoryCommitHistory.getTodaysCommit().append(
+						commitTextStringBuilder);
+				break;
+			case DAYS_BEFORE_YESTERDAY:
+				repositoryCommitHistory.getDayBeforeYesrdaysCommit().append(
+						commitTextStringBuilder);
 				break;
 			}
 
@@ -183,7 +203,8 @@ public class ExtractCommittedTextThraed implements Callable<UserCommitHistory> {
 		List<String> pagesContainingCommittedText = new ArrayList<String>();
 		try {
 			Document document = Jsoup.connect(url).get();
-			Elements pages = document.select(UserCommitCrawlerConstants.COMMITED_TEXT_PAGE_FINDER_REGEX);
+			Elements pages = document
+					.select(UserCommitCrawlerConstants.COMMITED_TEXT_PAGE_FINDER_REGEX);
 
 			for (Element page : pages) {
 				pagesContainingCommittedText.add(page.attr("abs:href"));
