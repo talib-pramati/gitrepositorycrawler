@@ -17,9 +17,16 @@
 			<div id="message">${requestScope.message}</div>
 		</form>
 	</div>
+	<c:if test="${not empty requestScope.userCommitHistoryList}">
 	<div>
 
 		<table border=1>
+			<thead>
+				<tr>
+					<th>User Name</th>
+					<th>Commit Description</th>
+				</tr>
+			</thead>
 			<tbody>
 				<c:forEach items="${requestScope.userCommitHistoryList}"
 					var="userCommitHistory">
@@ -53,5 +60,6 @@
 			</tbody>
 		</table>
 	</div>
+	</c:if>
 </body>
 </html>

@@ -1,13 +1,11 @@
 package com.pramati.usercommitcrawler.utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,7 +21,7 @@ import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
 public class RepositoryCrawler {
 
 	private UserProjects userProjects = new UserProjects();
-	private UserCommitCrawlerThreadManager threadManager = new UserCommitCrawlerThreadManager();
+	private UserThreadManager threadManager = new UserThreadManager();
 
 	public List<UserCommitHistory> getUsersCommitHistory(StringBuilder fileInput)
 			throws IOException {

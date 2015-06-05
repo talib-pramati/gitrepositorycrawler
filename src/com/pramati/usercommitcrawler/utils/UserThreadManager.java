@@ -15,10 +15,10 @@ import com.pramati.usercommitcrawler.beans.UserCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
 import com.sun.istack.internal.logging.Logger;
 
-public class UserCommitCrawlerThreadManager {
+public class UserThreadManager {
 
 	public static final Logger LOGGER = Logger
-			.getLogger(UserCommitCrawlerThreadManager.class);
+			.getLogger(UserThreadManager.class);
 	private ExecutorService executor = Executors
 			.newFixedThreadPool(UserCommitCrawlerConstants.Maximum_Threads);
 
@@ -33,7 +33,7 @@ public class UserCommitCrawlerThreadManager {
 			String userName = nameQ.poll();
 			List<String> projectsCommitHistoryPage = userProjectsMap
 					.get(userName);
-			userCommitHistoryCallables.add(new ExtractCommittedTextThraed(
+			userCommitHistoryCallables.add(new RepositoryThreadManager(
 					userName, projectsCommitHistoryPage));
 		}
 		try {
