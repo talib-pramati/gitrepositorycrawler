@@ -87,7 +87,7 @@ public class ExtractCommittedTextThread implements Callable<RepositoryCommitHist
 			StringBuilder commitTextStringBuilder = new StringBuilder();
 			for (Element committedText : commitTexts) {
 				String text = committedText.text();
-				text = text.replace("+", "").replace("<", "<'")
+				text = text.replace("<", "<'").replace("+", "<BR>+").replace("-", "<BR>-")
 						.replace(";", "<BR>");
 				commitTextStringBuilder.append(text);
 			}
