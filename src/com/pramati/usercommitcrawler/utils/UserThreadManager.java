@@ -51,7 +51,9 @@ public class UserThreadManager {
 		for (Future<UserCommitHistory> commitHistoryFuture : userCommitHistoryfutures) {
 
 			try {
-				userCommitHistoryList.add(commitHistoryFuture.get());
+				UserCommitHistory userCommitHistory = commitHistoryFuture.get();
+				
+				userCommitHistoryList.add(userCommitHistory);
 			} catch (InterruptedException | ExecutionException exception) {
 
 				if (LOGGER.isLoggable(Level.SEVERE)) {

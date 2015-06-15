@@ -16,6 +16,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.pramati.usercommitcrawler.beans.UserCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
+import com.pramati.usercommitcrawler.mutex.CustomizedConnection;
 import com.pramati.usercommitcrawler.utils.RepositoryCrawler;
 import com.sun.istack.internal.logging.Logger;
 
@@ -27,7 +28,7 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final Logger LOGGER = Logger
 			.getLogger(UserCommitCrawlerServlet.class);
-
+	
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -50,6 +51,7 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 		if (ServletFileUpload.isMultipartContent(request)) {
 			try {
 
+				long methodStartTime = System.currentTimeMillis();
 				RepositoryCrawler repositoryCrawler = new RepositoryCrawler();
 				StringBuilder fileInput = repositoryCrawler
 						.readMultiPartRequest(request);
@@ -63,6 +65,9 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 				servletContext.getRequestDispatcher(
 						UserCommitCrawlerConstants.JSP_PATH).forward(request,
 						response);
+				long methodEndTime = System.currentTimeMillis();
+				LOGGER.info("NetworkExecution Time is in millisecond : " + CustomizedConnection.getNetworkConnectionTime()/1000000);
+				LOGGER.info("Total execution Time of the application is in millisecond : " + (methodEndTime - methodStartTime));
 			} catch (FileUploadException exception) {
 
 				if (LOGGER.isLoggable(Level.SEVERE)) {

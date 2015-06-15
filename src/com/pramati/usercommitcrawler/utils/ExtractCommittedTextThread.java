@@ -7,38 +7,46 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 
 import org.joda.time.DateTime;
-import org.jsoup.Jsoup;
+import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.pramati.usercommitcrawler.beans.RepositoryCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
+import com.pramati.usercommitcrawler.mutex.CustomizedConnection;
 import com.sun.istack.internal.logging.Logger;
 
-public class ExtractCommittedTextThread implements Callable<RepositoryCommitHistory>{
+public class ExtractCommittedTextThread implements
+		Callable<RepositoryCommitHistory> {
 
-	
-	 String repositoryCommitHistoryPage;
-	 List<String> pagesContainingCommittedText;
-	 
-	 public static final Logger LOGGER = Logger.getLogger(ExtractCommittedTextThread.class);
-	ExtractCommittedTextThread(String repositoryCommitHistoryPage,List<String> pagesContainingCommittedText)
-	{
+	String repositoryCommitHistoryPage;
+	List<String> pagesContainingCommittedText;
+
+	public static final Logger LOGGER = Logger
+			.getLogger(ExtractCommittedTextThread.class);
+
+	ExtractCommittedTextThread(String repositoryCommitHistoryPage,
+			List<String> pagesContainingCommittedText) {
 		this.repositoryCommitHistoryPage = repositoryCommitHistoryPage;
-		this.pagesContainingCommittedText = pagesContainingCommittedText; 
+		this.pagesContainingCommittedText = pagesContainingCommittedText;
 	}
-	
+
 	@Override
 	public RepositoryCommitHistory call() throws Exception {
-		
+
 		RepositoryCommitHistory repositoryCommitHistory = new RepositoryCommitHistory();
-		repositoryCommitHistory.setRepoSitoryName(repositoryCommitHistoryPage.split("/")[4]);
-		
+		repositoryCommitHistory.setRepoSitoryName(repositoryCommitHistoryPage
+				.split("/")[4]);
+
 		for (String pageContainingCommittedText : pagesContainingCommittedText) {
-			Document documnent = Jsoup.connect(pageContainingCommittedText)
-					.get();
-			String date = documnent.select("time").attr("datetime");
+
+			CustomizedConnection customizedConnection = CustomizedConnection
+					.getInstance();
+			Connection connect = customizedConnection
+					.makeConnection(pageContainingCommittedText);
+			Document document = connect.get();
+			String date = document.select("time").attr("datetime");
 
 			DateTime committedPagesdDateTime = new DateTime(date);
 			DateTime today = DateTime.now();
@@ -50,12 +58,10 @@ public class ExtractCommittedTextThread implements Callable<RepositoryCommitHist
 					&& committedPagesdDateTime.getDayOfMonth() == today
 							.getDayOfMonth()) {
 				appendCommitText(repositoryCommitHistory,
-						CommitHistoryFields.TODAY,
-						pageContainingCommittedText);
+						CommitHistoryFields.TODAY, pageContainingCommittedText);
 			}
 
-			else if (committedPagesdDateTime.getYear() == yesterday
-					.getYear()
+			else if (committedPagesdDateTime.getYear() == yesterday.getYear()
 					&& committedPagesdDateTime.getMonthOfYear() == yesterday
 							.getMonthOfYear()
 					&& committedPagesdDateTime.getDayOfMonth() == yesterday
@@ -72,23 +78,27 @@ public class ExtractCommittedTextThread implements Callable<RepositoryCommitHist
 						pageContainingCommittedText);
 			}
 		}
-		
+
 		return repositoryCommitHistory;
 	}
-	
+
 	public void appendCommitText(
 			RepositoryCommitHistory repositoryCommitHistory,
 			CommitHistoryFields fieldValue, String url) throws IOException {
 
 		try {
-			Document document = Jsoup.connect(url).get();
+
+			CustomizedConnection customizedConnection = CustomizedConnection
+					.getInstance();
+			Connection connect = customizedConnection.makeConnection(url);
+			Document document = connect.get();
 			Elements commitTexts = document
 					.select(UserCommitCrawlerConstants.TEXT_SELECTOR_REGEX);
 			StringBuilder commitTextStringBuilder = new StringBuilder();
 			for (Element committedText : commitTexts) {
 				String text = committedText.text();
-				text = text.replace("<", "<'").replace("+", "<BR>+").replace("-", "<BR>-")
-						.replace(";", "<BR>");
+				text = text.replace("<", "<'").replace("+", "<BR>+")
+						.replace("-", "<BR>-").replace(";", "<BR>");
 				commitTextStringBuilder.append(text);
 			}
 

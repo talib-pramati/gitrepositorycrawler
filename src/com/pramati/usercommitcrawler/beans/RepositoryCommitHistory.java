@@ -7,6 +7,7 @@ public class RepositoryCommitHistory {
 	public StringBuilder dayBeforeYesrdaysCommit = new StringBuilder();
 	public StringBuilder yesterdaysCommit = new StringBuilder();
 	public StringBuilder todaysCommit = new StringBuilder();
+	public Long networkWatitingTime = new Long(0);
 	
 	public StringBuilder getDayBeforeYesrdaysCommit() {
 		return dayBeforeYesrdaysCommit;
@@ -31,6 +32,12 @@ public class RepositoryCommitHistory {
 	}
 	public void setRepoSitoryName(String repoSitoryName) {
 		this.repoSitoryName = repoSitoryName;
+	}
+	public Long getNetworkWatitingTime() {
+		return networkWatitingTime;
+	}
+	public void setNetworkWatitingTime(Long networkWatitingTime) {
+		this.networkWatitingTime = networkWatitingTime;
 	}
 
 }

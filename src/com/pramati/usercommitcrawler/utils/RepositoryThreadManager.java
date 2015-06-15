@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
-import org.jsoup.Jsoup;
+import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -20,13 +20,13 @@ import org.jsoup.select.Elements;
 import com.pramati.usercommitcrawler.beans.RepositoryCommitHistory;
 import com.pramati.usercommitcrawler.beans.UserCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
+import com.pramati.usercommitcrawler.mutex.CustomizedConnection;
 import com.sun.istack.internal.logging.Logger;
 
 public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 
 	public static final Logger LOGGER = Logger
 			.getLogger(RepositoryThreadManager.class);
-
 	private String userName;
 	private List<String> projectsCommitHistoryPage;
 	ExecutorService executor = Executors
@@ -73,8 +73,11 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 			for (Future<RepositoryCommitHistory> future : repositoryCommitHistoryFuture) {
 
 				try {
+					RepositoryCommitHistory repositoryCommitHistory = future
+							.get();
+					// addNetworkTime(repositoryCommitHistory.getNetworkWatitingTime());
 					userCommitHistory.getRepositoryCommitHistory().add(
-							future.get());
+							repositoryCommitHistory);
 				} catch (InterruptedException | ExecutionException exception) {
 
 					if (LOGGER.isLoggable(Level.SEVERE)) {
@@ -114,7 +117,11 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 
 		List<String> pagesContainingCommittedText = new ArrayList<String>();
 		try {
-			Document document = Jsoup.connect(url).get();
+
+			CustomizedConnection customizedConnection = CustomizedConnection
+					.getInstance();
+			Connection connect = customizedConnection.makeConnection(url);
+			Document document = connect.get();
 			Elements pages = document
 					.select(UserCommitCrawlerConstants.COMMITED_TEXT_PAGE_FINDER_REGEX);
 
