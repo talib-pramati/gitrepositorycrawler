@@ -3,7 +3,7 @@ package com.pramati.usercommitcrawler.constants;
 public class UserCommitCrawlerConstants {
 	
 	public static final String JSP_PATH = "/Pages/UserCommits.jsp";
-	public static final int Maximum_Threads = 10;
+	public static final int Maximum_Threads = 50;
 	public static final String FILE_LOCATION = "/input/user-repourl";
 	public static final String DELIMINITOR = ",";
 	public static final String PUBLIC_REPO_REGEX = "a[href].mini-repo-list-item";

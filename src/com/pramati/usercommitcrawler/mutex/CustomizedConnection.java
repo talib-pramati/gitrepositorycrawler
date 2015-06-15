@@ -1,44 +1,26 @@
 package com.pramati.usercommitcrawler.mutex;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.jsoup.Connection;
 import org.jsoup.helper.HttpConnection;
 
 public class CustomizedConnection {
 	
-	private volatile static CustomizedConnection _instance;
-	private static Long networkConnectionTime = new Long(0) ;
-	private boolean isConnectionBusy = false;
+	private static AtomicLong networkConnectionTime = new AtomicLong(0l);
 	
-	private CustomizedConnection(){
-	
-	}
-	
-	public static CustomizedConnection getInstance()
+	public Connection makeConnection(String url)
 	{
-		if(_instance == null)
-		{
-			synchronized(CustomizedConnection.class)
-			{
-				_instance = new CustomizedConnection();
-			}
-		}
-		
-		return _instance;
-	}
-	
-	public synchronized Connection makeConnection(String url)
-	{
-		while(isConnectionBusy);
 		long nanoStartTime = System.nanoTime();
 		Connection connect = HttpConnection.connect(url);
 		long nanoEndTime = System.nanoTime();
-		networkConnectionTime = networkConnectionTime + (nanoEndTime - nanoStartTime);
-		isConnectionBusy = false;
+		networkConnectionTime.addAndGet(nanoEndTime- nanoStartTime);
 		return connect;
 	}
 
 	public static Long getNetworkConnectionTime() {
-		return networkConnectionTime;
+		return networkConnectionTime.get();
 	}
+
 
 }

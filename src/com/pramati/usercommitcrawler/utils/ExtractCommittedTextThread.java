@@ -41,8 +41,8 @@ public class ExtractCommittedTextThread implements
 
 		for (String pageContainingCommittedText : pagesContainingCommittedText) {
 
-			CustomizedConnection customizedConnection = CustomizedConnection
-					.getInstance();
+			CustomizedConnection customizedConnection = new CustomizedConnection();
+					
 			Connection connect = customizedConnection
 					.makeConnection(pageContainingCommittedText);
 			Document document = connect.get();
@@ -88,8 +88,7 @@ public class ExtractCommittedTextThread implements
 
 		try {
 
-			CustomizedConnection customizedConnection = CustomizedConnection
-					.getInstance();
+			CustomizedConnection customizedConnection =  new CustomizedConnection();
 			Connection connect = customizedConnection.makeConnection(url);
 			Document document = connect.get();
 			Elements commitTexts = document

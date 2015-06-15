@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -31,7 +33,9 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 	private List<String> projectsCommitHistoryPage;
 	ExecutorService executor = Executors
 			.newFixedThreadPool(UserCommitCrawlerConstants.Maximum_Threads);
-
+	CompletionService<RepositoryCommitHistory> completionService =new 
+			ExecutorCompletionService<RepositoryCommitHistory>(executor);
+	
 	RepositoryThreadManager(String userName,
 			List<String> projectsCommitLocationURL) {
 
@@ -41,7 +45,7 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 	}
 
 	@Override
-	public UserCommitHistory call() {
+	public UserCommitHistory call() throws InterruptedException, ExecutionException {
 
 		UserCommitHistory userCommitHistory = new UserCommitHistory();
 		try {
@@ -51,14 +55,13 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 			List<Future<RepositoryCommitHistory>> repositoryCommitHistoryFuture = new ArrayList<Future<RepositoryCommitHistory>>();
 
 			for (String repositoryCommitHistoryPage : projectsCommitHistoryPage) {
-				repositoryCommitHistoryCallable
-						.add(new ExtractCommittedTextThread(
+				completionService.submit(new ExtractCommittedTextThread(
 								repositoryCommitHistoryPage,
 								pagesContainingCommittedText
 										.get(repositoryCommitHistoryPage)));
 			}
 
-			try {
+			/*try {
 				repositoryCommitHistoryFuture = executor
 						.invokeAll(repositoryCommitHistoryCallable);
 			} catch (InterruptedException exception) {
@@ -68,14 +71,31 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 							exception);
 				}
 
-			}
+			}*/
 
-			for (Future<RepositoryCommitHistory> future : repositoryCommitHistoryFuture) {
+			/*for (Future<RepositoryCommitHistory> future : repositoryCommitHistoryFuture) {
 
 				try {
 					RepositoryCommitHistory repositoryCommitHistory = future
 							.get();
 					// addNetworkTime(repositoryCommitHistory.getNetworkWatitingTime());
+					userCommitHistory.getRepositoryCommitHistory().add(
+							repositoryCommitHistory);
+				} catch (InterruptedException | ExecutionException exception) {
+
+					if (LOGGER.isLoggable(Level.SEVERE)) {
+						LOGGER.log(Level.SEVERE,
+								"Severe Exception has occured", exception);
+					}
+				}
+			}*/
+			
+			for(int i = 0; i < projectsCommitHistoryPage.size(); i++)
+			{
+				Future<RepositoryCommitHistory> take = completionService.take();
+				
+				try {
+					RepositoryCommitHistory repositoryCommitHistory = take.get();
 					userCommitHistory.getRepositoryCommitHistory().add(
 							repositoryCommitHistory);
 				} catch (InterruptedException | ExecutionException exception) {
@@ -118,8 +138,7 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 		List<String> pagesContainingCommittedText = new ArrayList<String>();
 		try {
 
-			CustomizedConnection customizedConnection = CustomizedConnection
-					.getInstance();
+			CustomizedConnection customizedConnection =  new CustomizedConnection();
 			Connection connect = customizedConnection.makeConnection(url);
 			Document document = connect.get();
 			Elements pages = document

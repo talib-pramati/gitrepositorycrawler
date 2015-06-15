@@ -56,7 +56,7 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 				StringBuilder fileInput = repositoryCrawler
 						.readMultiPartRequest(request);
 
-				request.setAttribute("message", "file uploaded successfully");
+				request.setAttribute("message", "file uploaded successfully not");
 				List<UserCommitHistory> usersCommitHistoryList = repositoryCrawler
 						.getUsersCommitHistory(fileInput);
 				request.setAttribute("userCommitHistoryList",
