@@ -17,6 +17,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import com.pramati.usercommitcrawler.beans.UserCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
 import com.pramati.usercommitcrawler.mutex.CustomizedConnection;
+import com.pramati.usercommitcrawler.mutex.TimeManager;
 import com.pramati.usercommitcrawler.utils.RepositoryCrawler;
 import com.sun.istack.internal.logging.Logger;
 
@@ -65,7 +66,11 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 				servletContext.getRequestDispatcher(
 						UserCommitCrawlerConstants.JSP_PATH).forward(request,
 						response);
+				
 				long methodEndTime = System.currentTimeMillis();
+				LOGGER.info("Thraed User Code ExecutionTime is : " + TimeManager.get_userThreadCodeExecutionTime() / 1000000);
+				LOGGER.info("Thraed System Time For Executinh user code ExecutionTime is : " + TimeManager.get_userThreadSytemExecutionTime() / 1000000);
+				LOGGER.info("Thraed ExecutionTime is : " + TimeManager.getTotalExecutionTime() / 1000000);
 				LOGGER.info("NetworkExecution Time is in millisecond : " + CustomizedConnection.getNetworkConnectionTime()/1000000);
 				LOGGER.info("Total execution Time of the application is in millisecond : " + (methodEndTime - methodStartTime));
 			} catch (FileUploadException exception) {

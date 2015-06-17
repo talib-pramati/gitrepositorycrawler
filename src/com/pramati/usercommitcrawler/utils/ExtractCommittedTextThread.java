@@ -15,6 +15,7 @@ import org.jsoup.select.Elements;
 import com.pramati.usercommitcrawler.beans.RepositoryCommitHistory;
 import com.pramati.usercommitcrawler.constants.UserCommitCrawlerConstants;
 import com.pramati.usercommitcrawler.mutex.CustomizedConnection;
+import com.pramati.usercommitcrawler.mutex.TimeManager;
 import com.sun.istack.internal.logging.Logger;
 
 public class ExtractCommittedTextThread implements
@@ -78,7 +79,8 @@ public class ExtractCommittedTextThread implements
 						pageContainingCommittedText);
 			}
 		}
-
+		
+		TimeManager.addTime(Thread.currentThread().getId());
 		return repositoryCommitHistory;
 	}
 

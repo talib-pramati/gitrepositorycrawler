@@ -21,6 +21,7 @@ public class UserProjects {
 	public static final Logger LOGGER = Logger.getLogger(UserProjects.class);
 	public ConcurrentHashMap<String, List<String>> findUsersPublicProjects( ConcurrentHashMap<String, String> userRepositoryURLMap) throws IOException
 	{
+		long startNanoTime = System.nanoTime();
 		ConcurrentHashMap<String, List<String>> userProjsCommitHistoryPage = new ConcurrentHashMap<String, List<String>>();
 		Set<String> userNames = userRepositoryURLMap.keySet();
 				
@@ -29,12 +30,14 @@ public class UserProjects {
 			String userRepoURL = userRepositoryURLMap.get(userName);
 			userProjsCommitHistoryPage.put(userName, getUsersPublicProjsCommitHistoryPage(userRepoURL));
 		}
-		
+		long endNanoTime = System.nanoTime();
+		System.out.println("pblic repository time " + (endNanoTime - startNanoTime) / 1000000);
 		return userProjsCommitHistoryPage;
 	}
 
 	public List<String> getUsersPublicProjsCommitHistoryPage(String userRepoURL) throws IOException {
 	
+		long startNanoTime = System.nanoTime();
 		List<String> userPublicProjCommitHistoryPage = new ArrayList<String>();
 		try{
 			
@@ -54,6 +57,8 @@ public class UserProjects {
 			}
 		}
 		
+		long endNanoTime = System.nanoTime();/*
+		System.out.println("finding commitURL of each proj " + (endNanoTime - startNanoTime)/1000000);*/
 		return userPublicProjCommitHistoryPage;
 	}
 

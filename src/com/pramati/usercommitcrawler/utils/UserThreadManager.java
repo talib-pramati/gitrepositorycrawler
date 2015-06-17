@@ -3,7 +3,6 @@ package com.pramati.usercommitcrawler.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -31,9 +30,7 @@ public class UserThreadManager {
 
 		List<UserCommitHistory> userCommitHistoryList = new ArrayList<UserCommitHistory>();
 		int noOfUsers = nameQ.size();
-		/*List<Callable<UserCommitHistory>> userCommitHistoryCallables = new ArrayList<Callable<UserCommitHistory>>();
-		List<Future<UserCommitHistory>> userCommitHistoryfutures = new ArrayList<Future<UserCommitHistory>>();
-*/
+		
 		while (!nameQ.isEmpty()) {
 			String userName = nameQ.poll();
 			List<String> projectsCommitHistoryPage = userProjectsMap

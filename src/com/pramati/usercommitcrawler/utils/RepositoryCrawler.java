@@ -43,6 +43,7 @@ public class RepositoryCrawler {
 
 	public UserInformation getUserInformation(StringBuilder fileInput) {
 
+		long startNanoTime = System.nanoTime();
 		UserInformation userInformation = new UserInformation();
 		ConcurrentHashMap<String, String> userRepositoryURLMap = new ConcurrentHashMap<String, String>();
 		Queue<String> userNameQ = new ConcurrentLinkedQueue<String>();
@@ -59,12 +60,15 @@ public class RepositoryCrawler {
 
 		userInformation.setUserNameQ(userNameQ);
 		userInformation.setUserRepositoryURLMap(userRepositoryURLMap);
+		long endNanoTime = System.nanoTime();
+		System.out.println("user info " + (endNanoTime - startNanoTime)/1000000);
 		return userInformation;
 	}
 
 	public StringBuilder readMultiPartRequest(HttpServletRequest request)
 			throws FileUploadException {
 
+		long startNanoTime = System.nanoTime();
 		StringBuilder fileInput = new StringBuilder();
 		List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory())
 				.parseRequest(request);
@@ -72,6 +76,10 @@ public class RepositoryCrawler {
 		for (FileItem item : items) {
 			fileInput.append(item.getString());
 		}
+		
+		long endNanoTime = System.nanoTime();
+		
+		System.out.println("MultiPartExecutionTime " + (endNanoTime - startNanoTime)/1000000);
 
 		return fileInput;
 	}
