@@ -9,28 +9,55 @@ public class TimeManager {
 	private static AtomicLong _userThreadCodeExecutionTime = new AtomicLong(0);
 	private static AtomicLong _userThreadSytemExecutionTime = new AtomicLong(0);
 
-	public static void addTime(long id) {
+	 public static void addUserTime(long sum) {
 
-		ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-		if (bean.isCurrentThreadCpuTimeSupported()) {
-			_userThreadCodeExecutionTime.addAndGet(bean.getThreadUserTime(id));
-			_userThreadSytemExecutionTime.addAndGet(bean.getThreadCpuTime(id) - bean.getThreadUserTime(id));
-			
-			
-		}
+		if(sum > 0)
+		 _userThreadCodeExecutionTime.addAndGet(sum);
 
 	}
+	 
+	 public static void addSystemTime(long sum) {
+		 
+		if(sum > 0)
+		 _userThreadSytemExecutionTime.addAndGet(sum);
+
+	}
+	 
+	 public static long getSystemTime(long id) {
+
+			ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+
+			return bean.isCurrentThreadCpuTimeSupported() ? (bean
+					.getThreadCpuTime(id) - bean.getThreadUserTime(id)) : 0L;
+		}
+
+		public static long getUserTime(long id) {
+
+			ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+
+			return bean.isCurrentThreadCpuTimeSupported() ? bean
+					.getThreadUserTime(id) : 0L;
+		}
+
 
 	public static Long getTotalExecutionTime() {
 		return _userThreadCodeExecutionTime.get() + _userThreadSytemExecutionTime.get();
 	}
 
-	public static long get_userThreadCodeExecutionTime() {
+	public static long get_userThreadCodeExecutionTimeValue() {
 		return _userThreadCodeExecutionTime.get();
 	}
 
-	public static long get_userThreadSytemExecutionTime() {
+	public static long get_userThreadSytemExecutionTimeValue() {
 		return _userThreadSytemExecutionTime.get();
+	}
+	
+	public static AtomicLong get_userThreadCodeExecutionTime() {
+		return _userThreadCodeExecutionTime;
+	}
+
+	public static AtomicLong get_userThreadSytemExecutionTime() {
+		return _userThreadSytemExecutionTime;
 	}
 
 

@@ -23,6 +23,7 @@ public class ExtractCommittedTextThread implements
 
 	String repositoryCommitHistoryPage;
 	List<String> pagesContainingCommittedText;
+	Long sum = new Long(0);
 
 	public static final Logger LOGGER = Logger
 			.getLogger(ExtractCommittedTextThread.class);
@@ -34,8 +35,12 @@ public class ExtractCommittedTextThread implements
 	}
 
 	@Override
-	public RepositoryCommitHistory call() throws Exception {
+	public RepositoryCommitHistory call() {
 
+		long userThraedExecutionStartTime = TimeManager.getUserTime(Thread
+				.currentThread().getId());
+		long systemThraedExecutionStartTime = TimeManager.getSystemTime(Thread
+				.currentThread().getId());
 		RepositoryCommitHistory repositoryCommitHistory = new RepositoryCommitHistory();
 		repositoryCommitHistory.setRepoSitoryName(repositoryCommitHistoryPage
 				.split("/")[4]);
@@ -43,44 +48,69 @@ public class ExtractCommittedTextThread implements
 		for (String pageContainingCommittedText : pagesContainingCommittedText) {
 
 			CustomizedConnection customizedConnection = new CustomizedConnection();
-					
-			Connection connect = customizedConnection
-					.makeConnection(pageContainingCommittedText);
-			Document document = connect.get();
-			String date = document.select("time").attr("datetime");
 
-			DateTime committedPagesdDateTime = new DateTime(date);
-			DateTime today = DateTime.now();
-			DateTime yesterday = DateTime.now().minusDays(1);
+			try {
+				Connection connect = customizedConnection
+						.makeConnection(pageContainingCommittedText);
+				Document document = connect.get();
+				String date = document.select("time").attr("datetime");
 
-			if (committedPagesdDateTime.getYear() == today.getYear()
-					&& committedPagesdDateTime.getMonthOfYear() == today
-							.getMonthOfYear()
-					&& committedPagesdDateTime.getDayOfMonth() == today
-							.getDayOfMonth()) {
-				appendCommitText(repositoryCommitHistory,
-						CommitHistoryFields.TODAY, pageContainingCommittedText);
-			}
+				DateTime committedPagesdDateTime = new DateTime(date);
+				DateTime today = DateTime.now();
+				DateTime yesterday = DateTime.now().minusDays(1);
 
-			else if (committedPagesdDateTime.getYear() == yesterday.getYear()
-					&& committedPagesdDateTime.getMonthOfYear() == yesterday
-							.getMonthOfYear()
-					&& committedPagesdDateTime.getDayOfMonth() == yesterday
-							.getDayOfMonth()) {
-				appendCommitText(repositoryCommitHistory,
-						CommitHistoryFields.YESTERDAY,
-						pageContainingCommittedText);
-			}
+				if (committedPagesdDateTime.getYear() == today.getYear()
+						&& committedPagesdDateTime.getMonthOfYear() == today
+								.getMonthOfYear()
+						&& committedPagesdDateTime.getDayOfMonth() == today
+								.getDayOfMonth()) {
+					appendCommitText(repositoryCommitHistory,
+							CommitHistoryFields.TODAY,
+							pageContainingCommittedText);
+				}
 
-			else {
+				else if (committedPagesdDateTime.getYear() == yesterday
+						.getYear()
+						&& committedPagesdDateTime.getMonthOfYear() == yesterday
+								.getMonthOfYear()
+						&& committedPagesdDateTime.getDayOfMonth() == yesterday
+								.getDayOfMonth()) {
+					appendCommitText(repositoryCommitHistory,
+							CommitHistoryFields.YESTERDAY,
+							pageContainingCommittedText);
+				}
 
-				appendCommitText(repositoryCommitHistory,
-						CommitHistoryFields.DAYS_BEFORE_YESTERDAY,
-						pageContainingCommittedText);
+				else {
+
+					appendCommitText(repositoryCommitHistory,
+							CommitHistoryFields.DAYS_BEFORE_YESTERDAY,
+							pageContainingCommittedText);
+				}
+			} catch (SocketTimeoutException socketTimeoutException) {
+				if (LOGGER.isLoggable(Level.WARNING)) {
+					LOGGER.log(Level.WARNING,
+							"SocketTimeOut Exception has occured. ");
+				}
+			} catch (Exception exception) {
+				if (LOGGER.isLoggable(Level.WARNING)) {
+					LOGGER.log(Level.WARNING,
+							"SocketTimeOut Exception has occured. ", exception);
+				}
 			}
 		}
-		
-		TimeManager.addTime(Thread.currentThread().getId());
+
+		// TimeManager.addTime(Thread.currentThread().getId());
+		long userThraedExecutionEndTime = TimeManager.getUserTime(Thread
+				.currentThread().getId());
+		long systemThraedExecutionEndTime = TimeManager.getSystemTime(Thread
+				.currentThread().getId());
+		TimeManager.addUserTime(userThraedExecutionEndTime - userThraedExecutionStartTime);
+		TimeManager.addSystemTime(systemThraedExecutionEndTime - systemThraedExecutionStartTime);
+
+		System.out
+				.println("This thread should take long time."
+						+ ((userThraedExecutionEndTime - userThraedExecutionStartTime) + (systemThraedExecutionEndTime - systemThraedExecutionStartTime)));
+
 		return repositoryCommitHistory;
 	}
 
@@ -90,7 +120,7 @@ public class ExtractCommittedTextThread implements
 
 		try {
 
-			CustomizedConnection customizedConnection =  new CustomizedConnection();
+			CustomizedConnection customizedConnection = new CustomizedConnection();
 			Connection connect = customizedConnection.makeConnection(url);
 			Document document = connect.get();
 			Elements commitTexts = document

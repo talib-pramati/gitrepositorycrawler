@@ -49,6 +49,10 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 	public UserCommitHistory call() throws InterruptedException,
 			ExecutionException {
 
+		long userThraedExecutionStartTime = TimeManager.getUserTime(Thread
+				.currentThread().getId());
+		long systemThraedExecutionStartTime = TimeManager.getSystemTime(Thread
+				.currentThread().getId());
 		UserCommitHistory userCommitHistory = new UserCommitHistory();
 		try {
 
@@ -78,15 +82,31 @@ public class RepositoryThreadManager implements Callable<UserCommitHistory> {
 				}
 			}
 
-		} catch (IOException exception) {
+		} catch (SocketTimeoutException socketTimeoutException) {
+
+			if (LOGGER.isLoggable(Level.SEVERE)) {
+				LOGGER.log(Level.SEVERE, "SocketTimeoutException has occured");
+			}
+		}
+
+		catch (IOException exception) {
 
 			if (LOGGER.isLoggable(Level.SEVERE)) {
 				LOGGER.log(Level.SEVERE, "IOException has occured", exception);
 			}
 		}
 
-		TimeManager.addTime(Thread.currentThread().getId());
+		// TimeManager.addTime(Thread.currentThread().getId());
+		long userThraedExecutionEndTime = TimeManager.getUserTime(Thread
+				.currentThread().getId());
+		long systemThraedExecutionEndTime = TimeManager.getSystemTime(Thread
+				.currentThread().getId());
+		TimeManager.addUserTime(userThraedExecutionEndTime - userThraedExecutionStartTime);
+		TimeManager.addSystemTime(systemThraedExecutionEndTime - systemThraedExecutionStartTime);
 		userCommitHistory.setUserName(userName);
+		System.out
+				.println("This thread should take less time."
+						+ ((systemThraedExecutionEndTime - systemThraedExecutionStartTime) + (userThraedExecutionEndTime - userThraedExecutionStartTime)));
 		return userCommitHistory;
 
 	}

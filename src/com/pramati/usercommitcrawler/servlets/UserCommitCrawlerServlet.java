@@ -29,7 +29,7 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final Logger LOGGER = Logger
 			.getLogger(UserCommitCrawlerServlet.class);
-	
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -49,15 +49,22 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		long methodStartTime = System.currentTimeMillis();
 		if (ServletFileUpload.isMultipartContent(request)) {
 			try {
 
-				long methodStartTime = System.currentTimeMillis();
+				TimeManager.get_userThreadCodeExecutionTime().set(0);
+				TimeManager.get_userThreadSytemExecutionTime().set(0);
+				System.out.println("intial sys value "
+						+ TimeManager.get_userThreadCodeExecutionTimeValue());
+				System.out.println("intial sys value "
+						+ TimeManager.get_userThreadSytemExecutionTimeValue());
 				RepositoryCrawler repositoryCrawler = new RepositoryCrawler();
 				StringBuilder fileInput = repositoryCrawler
 						.readMultiPartRequest(request);
 
-				request.setAttribute("message", "file uploaded successfully not");
+				request.setAttribute("message",
+						"file uploaded successfully not");
 				List<UserCommitHistory> usersCommitHistoryList = repositoryCrawler
 						.getUsersCommitHistory(fileInput);
 				request.setAttribute("userCommitHistoryList",
@@ -66,13 +73,21 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 				servletContext.getRequestDispatcher(
 						UserCommitCrawlerConstants.JSP_PATH).forward(request,
 						response);
-				
+
 				long methodEndTime = System.currentTimeMillis();
-				LOGGER.info("Thraed User Code ExecutionTime is : " + TimeManager.get_userThreadCodeExecutionTime() / 1000000);
-				LOGGER.info("Thraed System Time For Executinh user code ExecutionTime is : " + TimeManager.get_userThreadSytemExecutionTime() / 1000000);
-				LOGGER.info("Thraed ExecutionTime is : " + TimeManager.getTotalExecutionTime() / 1000000);
-				LOGGER.info("NetworkExecution Time is in millisecond : " + CustomizedConnection.getNetworkConnectionTime()/1000000);
-				LOGGER.info("Total execution Time of the application is in millisecond : " + (methodEndTime - methodStartTime));
+				LOGGER.info("Thraed User Code ExecutionTime is : "
+						+ TimeManager.get_userThreadCodeExecutionTimeValue()
+						/ 1000000);
+				LOGGER.info("Thraed System Time For Executinh user code ExecutionTime is : "
+						+ TimeManager.get_userThreadSytemExecutionTimeValue()
+						/ 1000000);
+				LOGGER.info("Thraed ExecutionTime is : "
+						+ TimeManager.getTotalExecutionTime() / 1000000);
+				LOGGER.info("NetworkExecution Time is in millisecond : "
+						+ CustomizedConnection.getNetworkConnectionTime()
+						/ 1000000);
+				LOGGER.info("Total execution Time of the application is in millisecond : "
+						+ (methodEndTime - methodStartTime));
 			} catch (FileUploadException exception) {
 
 				if (LOGGER.isLoggable(Level.SEVERE)) {
