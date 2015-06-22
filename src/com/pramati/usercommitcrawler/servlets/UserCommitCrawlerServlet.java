@@ -55,10 +55,7 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 
 				TimeManager.get_userThreadCodeExecutionTime().set(0);
 				TimeManager.get_userThreadSytemExecutionTime().set(0);
-				System.out.println("intial sys value "
-						+ TimeManager.get_userThreadCodeExecutionTimeValue());
-				System.out.println("intial sys value "
-						+ TimeManager.get_userThreadSytemExecutionTimeValue());
+				CustomizedConnection.getNetworkConnectionTime().set(0);
 				RepositoryCrawler repositoryCrawler = new RepositoryCrawler();
 				StringBuilder fileInput = repositoryCrawler
 						.readMultiPartRequest(request);
@@ -84,7 +81,7 @@ public class UserCommitCrawlerServlet extends HttpServlet {
 				LOGGER.info("Thraed ExecutionTime is : "
 						+ TimeManager.getTotalExecutionTime() / 1000000);
 				LOGGER.info("NetworkExecution Time is in millisecond : "
-						+ CustomizedConnection.getNetworkConnectionTime()
+						+ CustomizedConnection.getNetworkConnectionTimeValue()
 						/ 1000000);
 				LOGGER.info("Total execution Time of the application is in millisecond : "
 						+ (methodEndTime - methodStartTime));

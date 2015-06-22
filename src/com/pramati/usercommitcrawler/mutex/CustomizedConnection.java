@@ -18,8 +18,12 @@ public class CustomizedConnection {
 		return connect;
 	}
 
-	public static Long getNetworkConnectionTime() {
+	public static Long getNetworkConnectionTimeValue() {
 		return networkConnectionTime.get();
+	}
+	
+	public static AtomicLong getNetworkConnectionTime() {
+		return networkConnectionTime;
 	}
 
 
